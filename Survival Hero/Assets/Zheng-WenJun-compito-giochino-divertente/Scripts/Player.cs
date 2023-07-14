@@ -27,11 +27,16 @@ public class Player : MonoBehaviour
     [SerializeField] private Vector3 boxSize;
     [SerializeField] private float maxDistance;
     private float laserLength;
+    private Animator nemicoAnimator;
+    GameObject nemico;
 
     private void Awake()
     {
         playerInputActions = new PlayerInputActions();
         playerInputActions.Player.Enable();
+        nemico = GameObject.FindWithTag("Nemico");
+        nemicoAnimator = nemico.GetComponent<Animator>();
+
     }
 
     private void Start()
@@ -41,9 +46,10 @@ public class Player : MonoBehaviour
         animator = GetComponent<Animator>();
         boxSize = new Vector3(1, 0.1f, 0);
         Application.targetFrameRate = 60;
-        laserLength = 1.6f;
+        laserLength = 2f;
         movSpeed = 7f;
         saltoSpeed = 700f;
+
     }
 
 
@@ -84,7 +90,7 @@ public class Player : MonoBehaviour
 
     private void Salto()
     {
-        Debug.Log("Piedi per terra: "+GroundCheck());
+        Debug.Log("Piedi per terra: " + GroundCheck());
         Debug.Log("isColliding: " + isColliding);
         if (GroundCheck() && jump.enabled && isColliding)
         {
@@ -109,12 +115,19 @@ public class Player : MonoBehaviour
         {
             hit = Physics2D.Raycast(transform.position + new Vector3(0, 0.8f, 0), Vector2.right, laserLength, layerMask);
         }
-        if (hit.collider !=null)
+        if (hit.collider != null)
         {
-            if (hit.collider.CompareTag("Nemico")) Debug.Log("Attacking enemy");
+            if (hit.collider.CompareTag("Nemico"))
+            {
+                nemicoAnimator.SetBool("exit", false);
+                nemicoAnimator.SetBool("run", false);
+                nemicoAnimator.SetBool("dead", true);
+            }
+
+            Debug.Log("Attacking enemy");
             Debug.Log(hit.collider.tag);
         }
-        
+
 
 
     }
@@ -154,7 +167,7 @@ public class Player : MonoBehaviour
 
     }
 
-    
+
 
     private void GiraPersonaggio()
     {
@@ -171,13 +184,13 @@ public class Player : MonoBehaviour
     }
     private void AggiornaAnimazione()
     {
-        if(inputVector.x!=0  && GroundCheck())
+        if (inputVector.x != 0 && GroundCheck())
         {
             animator.SetBool("jump", false);
             animator.SetBool("idle", false);
-            animator.SetBool("running",true);
+            animator.SetBool("running", true);
         }
-        else if (GroundCheck()==false)
+        else if (GroundCheck() == false)
         {
             animator.SetBool("jump", true);
             animator.SetBool("idle", false);
@@ -202,7 +215,7 @@ public class Player : MonoBehaviour
 
     void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground")|| collision.gameObject.CompareTag("Oggetti"))
+        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.CompareTag("Oggetti"))
         {
             isColliding = false;
         }
@@ -215,7 +228,7 @@ public class Player : MonoBehaviour
     }
     private bool GroundCheck()
     {
-        if (Physics2D.BoxCast(transform.position+new Vector3(-0.1f,0.1f,0), boxSize, 0, -transform.up, maxDistance, layerMask))
+        if (Physics2D.BoxCast(transform.position + new Vector3(-0.1f, 0.1f, 0), boxSize, 0, -transform.up, maxDistance, layerMask))
         {
             //Debug.Log("Hitting: ground");
             return true;
@@ -227,3 +240,4 @@ public class Player : MonoBehaviour
         }
     }
 }
+
